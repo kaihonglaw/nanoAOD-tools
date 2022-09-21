@@ -21,26 +21,26 @@ class JetSelection(Module):
          self,
          inputCollection=lambda event: Collection(event, "Jet"),
          leptonCollectionDRCleaning=lambda event: [],
-         leptonCollectionP4Subraction=lambda event: [],
+         leptonCollectionP4Subtraction=lambda event: [],
          outputName="selectedJets",
          jetMinPtMerged=15.,
          jetMinPt=15.,
          jetMinEta=-1.,
          jetMaxEta=2.4,
-         jetMinNConstituents=-1,
+         jetMinNConstituents=2,
          dRCleaning=0.4,
          dRP4Subtraction=0.4,
          flagDA=False,
          globalFeatures = [],
          storeKinematics=['pt', 'eta', 'phi', 'minDeltaRSubtraction', 'ptLepton', 'ptOriginal', 'ptSubtracted', 'rawFactor', 'ptRaw'],
-         globalOptions={"isData": False, "year": 2016},
-         jetId=TIGHT
+         globalOptions={"isData": False, "year": 2018},
+         jetId=LOOSE
      ):
         self.globalOptions = globalOptions
 
         self.inputCollection = inputCollection
         self.leptonCollectionDRCleaning = leptonCollectionDRCleaning
-        self.leptonCollectionP4Subraction = leptonCollectionP4Subraction
+        self.leptonCollectionP4Subtraction = leptonCollectionP4Subtraction
         self.outputName = outputName
         self.jetMinPtMerged = jetMinPtMerged
         self.jetMinPt = jetMinPt
@@ -87,7 +87,7 @@ class JetSelection(Module):
         unselectedJets = []
 
         leptonsForDRCleaning = self.leptonCollectionDRCleaning(event)
-        leptonsForP4Subtraction = self.leptonCollectionP4Subraction(event)
+        leptonsForP4Subtraction = self.leptonCollectionP4Subtraction(event)
 
         if self.flagDA:
             flagsDA = [0.]*event.nJet
