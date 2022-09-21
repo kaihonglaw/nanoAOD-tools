@@ -1,3 +1,4 @@
+
 import os
 import sys
 import math
@@ -13,10 +14,10 @@ from utils import getHist,combineHist2D,getSFXY
 class SingleMuonTriggerSelection(Module):
     def __init__(
         self,
-        inputCollection = lambda event: getattr(event,"tightMuons"),
-        storeWeights=True,
-        outputName = "IsoMuTrigger",
-        globalOptions={"isData":False, "year":2016}
+        inputCollection = lambda event: getattr(event,"LooseMuons"),
+        storeWeights=False,
+        outputName = "DisplacedMuonTrigger",
+        globalOptions={"isData":False, "year":2018}
     ):
         self.globalOptions = globalOptions
         self.inputCollection = inputCollection
@@ -108,7 +109,13 @@ class SingleMuonTriggerSelection(Module):
             trigger_flag = event.HLT_IsoMu27>0 or event.HLT_IsoMu24>0
 
         elif self.globalOptions["year"] == 2018:
-            trigger_flag = event.HLT_IsoMu24
+            #trigger_flag = event.HLT_IsoMu24
+            trigger_flag = event.HLT_Mu9_IP6_part0 or \
+                           event.HLT_Mu9_IP6_part1 or \
+                           event.HLT_Mu9_IP6_part2 or \
+                           event.HLT_Mu9_IP6_part3 or \
+                           event.HLT_Mu9_IP6_part4
+                           # or event.HLT_Mu9_IP6_part5
 
         self.out.fillBranch(self.outputName+"_flag", trigger_flag)
             
