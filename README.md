@@ -11,7 +11,7 @@ Using the particular CMSSW release which is shipped with all the required softwa
 cmsrel CMSSW_10_2_18
 cd CMSSW_10_2_18/src
 cmsenv
-git clone -b HNL https://github.com/LLPDNNX/nanoAOD-tools.git PhysicsTools/NanoAODTools
+git clone -b DQCD_dev git@github.com:bainbrid/nanoAOD-tools.git PhysicsTools/NanoAODTools
 scram b
 ```
 
