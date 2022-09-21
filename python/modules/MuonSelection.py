@@ -21,17 +21,18 @@ class MuonSelection(Module):
     def __init__(
         self,
         inputCollection=lambda event: Collection(event, "Muon"),
-        outputName="tightMuons",
-        muonID=TIGHT,
-        muonIso=TIGHT,
-        muonMinPt=25.,
-        muonMaxEta=2.4,
+        outputName="LooseMuons",
+        muonID=LOOSE,
+        muonIso=NONE,
+        muonMinPt=3.,
+        muonMaxEta=2.5,
         muonMaxDxy=-1.,
         muonMaxDz=-1.,
+        muonMinDxysig=-1.,
         storeKinematics=['pt','eta'],
         storeWeights=False,
         selectLeadingOnly=False,
-        globalOptions={"isData":False, "year":2016}
+        globalOptions={"isData":False, "year":2018}
     ):
         
         self.globalOptions = globalOptions
@@ -41,6 +42,7 @@ class MuonSelection(Module):
         self.muonMaxEta = muonMaxEta
         self.muonMaxDxy = muonMaxDxy
         self.muonMaxDz = muonMaxDz
+        self.muonMinDxysig = muonMinDxysig
         self.storeKinematics = storeKinematics
         self.storeWeights = storeWeights
         self.selectLeadingOnly = selectLeadingOnly
@@ -311,6 +313,10 @@ class MuonSelection(Module):
                     unselectedMuons.append(muon)
                     continue
                 if self.muonMaxDz > 0. and abs(muon.dz) > self.muonMaxDz:
+                    unselectedMuons.append(muon)
+                    continue
+                dxysig = muon.dxy/muon.dxyErr if muon.dxyErr>0. else 0.
+                if self.muonMinDxysig > 0. and abs(dxysig) > self.muonMinDxysig:
                     unselectedMuons.append(muon)
                     continue
                 selectedMuons.append(muon)                    
