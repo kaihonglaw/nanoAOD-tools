@@ -32,6 +32,7 @@ parser.add_argument('--nobdt', dest='nobdt',
                     action='store_true', default=False)
 parser.add_argument('--overwrite_pu', action='store', default=None)
 parser.add_argument('--leptons', dest='leptons', type=int, default=2, choices=[1,2])
+parser.add_argument('--nLeptons', dest='nLeptons', type=int, default=5)
 parser.add_argument('--input', dest='inputFiles', action='append', default=[])
 parser.add_argument('--cutflow', dest='cutflow', action='store_true', default=False)
 
@@ -146,21 +147,10 @@ if args.notrigger is False:
         EventSkim(selection=trigger_matched, outputName="l1_triggermatch"),
     ])
     
-#if args.leptons==1:
-#    analyzerChain.append(
-#        EventSkim(selection=lambda event: event.nsubleadingLeptons==0, outputName="l2")
-#    )
-#else:
-#    analyzerChain.extend([
-#        EventSkim(selection=lambda event: event.nsubleadingLeptons>0, outputName="l2"),
-#        EventSkim(selection=lambda event: event.nsubleadingLeptons==1, outputName="l3"),
-#        InvariantSystem(
-#            inputCollection= lambda event: [event.leadingLeptons[0],event.subleadingLeptons[0]],
-#            outputName="dilepton"
-#        ),
-#    ])
+analyzerChain.append(
+    EventSkim(selection=lambda event: event.nLooseMuons>=args.nLeptons, outputName="MinMuons")
+)
 
-#featureDictFile = "${CMSSW_BASE}/src/PhysicsTools/NanoAODTools/data/nn/201117/feature_dict.py"
 featureDictFile = "${CMSSW_BASE}/src/PhysicsTools/NanoAODTools/data/nn/201117/experimental_feature_dict.py"
 
 
@@ -205,14 +195,12 @@ jerSFUncertaintyFile = {
     2018: "${CMSSW_BASE}/src/PhysicsTools/NanoAODTools/data/jme/Autumn18_V7_MC_SF_AK4PFchs.txt"
 }
 
-
 #analyzerChain.append(
 #     MetFilter(
 #        globalOptions=globalOptions,
 #        outputName="MET_filter"
 #     )
 #)
-
 
 def jetSelectionSequence(jetDict):
     sequence = []
@@ -226,7 +214,7 @@ def jetSelectionSequence(jetDict):
                 outputName="selectedJets_"+systName,
             ),
         ])
-        
+#        
 # GEN-level label for jet
 #        if isMC:
 #            sequence.append(
@@ -237,15 +225,15 @@ def jetSelectionSequence(jetDict):
 #                    globalOptions=globalOptions
 #                )
 #            )
-    
-    systNames = jetDict.keys()
-    sequence.append(
-        EventSkim(selection=lambda event, systNames=systNames: 
-            any([getattr(event, "nselectedJets_"+systName) > 0 for systName in systNames]),
-            outputName="jet",
-        )
-    )
-            
+#    
+#    systNames = jetDict.keys()
+#    sequence.append(
+#        EventSkim(selection=lambda event, systNames=systNames: 
+#            any([getattr(event, "nselectedJets_"+systName) > 0 for systName in systNames]),
+#            outputName="jet",
+#        )
+#    )
+#            
     return sequence
     
     
@@ -342,6 +330,29 @@ def bdtSequence(systematics):
         )
     return sequence
 
+# returns event weight per /fb for QCD mu-enriched Shat-binned MC samples
+def qcdShatWeight(fileName):
+    xs_pb = {
+        "Pt-15to20": 2799000.0,
+        "Pt-20to30": 2526000.0,
+        "Pt-30to50": 1362000.0,
+        "Pt-50to80": 376600.0,
+        "Pt-80to120": 88930.0,
+        "Pt-120to170": 21230.0,
+        "Pt-170to300": 7055.0,
+        "Pt-300to470": 619.3,
+        "Pt-470to600": 59.24,
+        "Pt-600to800": 18.21,
+        "Pt-800to1000": 3.275,
+        "Pt-1000toInf": 1.078,
+    }
+    weight = 1.
+    if "QCD_" in args.inputFiles[0] and "_MuEnrichedPt5" in args.inputFiles[0]:
+        pt_bin = str(args.inputFiles[0].split("QCD_")[1].split("_MuEnrichedPt5")[0])
+        xs = xs_pb.get(pt_bin,None)
+        tree.GetEntry(0); nevents = tree.totalBeforeSkim
+        weight = 1000. * xs / nevents if xs is not None else -1.
+    return weight
 
 if isMC:
 #    analyzerChain.append(
@@ -412,29 +423,6 @@ if isMC:
 #            subleadingLeptons=lambda event: event.subleadingLeptons
 #        )
 #    )    
-        
-#    analyzerChain.extend(
-#        taggerSequence({
-#            "nominal": lambda event: event.hnlJets_nominal,
-#            "jerUp": lambda event: event.hnlJets_jerUp,
-#            "jerDown": lambda event: event.hnlJets_jerDown,
-#            "jesTotalUp": lambda event: event.hnlJets_jesTotalUp,
-#            "jesTotalDown": lambda event: event.hnlJets_jesTotalDown,
-#            "unclEnUp": lambda event: event.hnlJets_nominal,
-#            "unclEnDown": lambda event: event.hnlJets_nominal,
-#        },
-#        modelFile=taggerModelPath[year],
-#        taggerName='llpdnnx'
-#    ))
-    
-#    analyzerChain.extend(
-#        bdtSequence([
-#            "nominal", 
-#            "jerUp", "jerDown", 
-#            "jesTotalUp", "jesTotalDown", 
-#            "unclEnUp", "unclEnDown"
-#        ])
-#    )
     
 #    analyzerChain.append(
 #        PileupWeight(
@@ -445,6 +433,7 @@ if isMC:
 #    )
 
     pass#@@
+
 else:
     analyzerChain.append(
         PhiXYCorrection(
@@ -495,33 +484,12 @@ storeVariables = [
     [lambda tree: tree.branch("nSV", "I"), 
      lambda tree,event: tree.fillBranch("nSV",event.nSV)],
     [lambda tree: tree.branch("SV_mass", "F", lenVar="nSV"), 
-     #lambda tree,event: tree.fillBranch("SV_mass",event.SV_mass)],
      lambda tree,event: tree.fillBranch("SV_mass",[event.SV_mass[i] for i in range(len(event.SV_mass))])],
-     #lambda tree,event: tree.fillBranch("SV_mass",list(event.SV_mass))],
 ]
 
-
-#if not globalOptions["isData"]:
-#    storeVariables.append([lambda tree: tree.branch("genweight", "F"),
-#                           lambda tree,
-#                           event: tree.fillBranch("genweight",
-#                           event.Generator_weight)])
-#
-#    analyzerChain.append(
-#        ScaleUncertainty(
-#            xsecs = json.load(open('/eos/user/b/bainbrid/DQCD/gridpackLookupTable.json')),
-#            isSignal = isSignal
-#        )
-#    )
-#    
-#
-#    if isSignal:
-#        analyzerChain.append(PDFUncertainty(isSignal = isSignal))
-#        for coupling in range(1,68):
-#            storeVariables.append([
-#                lambda tree, coupling=coupling: tree.branch('LHEWeights_coupling_%i'%coupling,'F'),
-#                lambda tree, event, coupling=coupling: tree.fillBranch('LHEWeights_coupling_%i'%coupling,getattr(event,"LHEWeights_coupling_%i"%coupling)),
-#            ])
+weight = qcdShatWeight(args.inputFiles[0])
+storeVariables.append([lambda tree: tree.branch("qcdShatWeight", "F"),
+                       lambda tree, event: tree.fillBranch("qcdShatWeight",weight)])
 
 analyzerChain.append(EventInfo(storeVariables=storeVariables))
 
@@ -531,7 +499,7 @@ p = PostProcessor(
     modules=analyzerChain,
     maxEvents=-1,
     friend=True,
-    #cut="((nMuon)>0)", #remove if doing cutflow
+    #cut="((nMuon)>0)", # remove if doing cutflow
     cutFlow=args.cutflow
 )
 
