@@ -316,7 +316,7 @@ class MuonSelection(Module):
                     unselectedMuons.append(muon)
                     continue
                 dxysig = muon.dxy/muon.dxyErr if muon.dxyErr>0. else 0.
-                if self.muonMinDxysig > 0. and abs(dxysig) > self.muonMinDxysig:
+                if self.muonMinDxysig > 0. and abs(dxysig) < self.muonMinDxysig:
                     unselectedMuons.append(muon)
                     continue
                 selectedMuons.append(muon)                    
