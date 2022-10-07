@@ -13,6 +13,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel \
     import Collection, Object
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 from PhysicsTools.NanoAODTools.modules import *
+from PhysicsTools.NanoAODTools.postprocessing.modules.common.countHistogramsModule import countHistogramsModule
 
 parser = argparse.ArgumentParser()
 
@@ -40,8 +41,8 @@ parser.add_argument('output', nargs=1)
 
 args = parser.parse_args()
 
-print "isData:",args.isData
-print "inputs:",len(args.inputFiles)
+print("isData:",args.isData)
+print("inputs:",len(args.inputFiles))
 isSignal = False
 
 
@@ -58,24 +59,24 @@ for inputFile in args.inputFiles:
         year = args.year
     rootFile = ROOT.TFile.Open(inputFile)
     if not rootFile:
-        print "CRITICAL - file '"+inputFile+"' not found!"
+        print("CRITICAL - file '"+inputFile+"' not found!")
         sys.exit(1)
     tree = rootFile.Get("Events")
     if not tree:
-        print "CRITICAL - 'Events' tree not found in file '"+inputFile+"'!"
+        print("CRITICAL - 'Events' tree not found in file '"+inputFile+"'!")
         sys.exit(1)
-    print " - ", inputFile, ", events=", tree.GetEntries()
+    print(" - ", inputFile, ", events=", tree.GetEntries())
 
 puProcessName = args.overwrite_pu
 
-print "year:", year
-print "isSignal:",isSignal
-print "apply lepton iso: ","True" if args.noiso is True else "False (default)"
-print "apply trigger selection: ","True" if args.notrigger is True else "False (default)"
-print "run BDT: ","True" if args.nobdt is True else "False (default)"
-print "run tagger: ","True" if args.notagger is True else "False (default)"
-print "channel: ","single lepton" if args.leptons==1 else "dilepton"
-print "output directory:", args.output[0]
+print("year:", year)
+print("isSignal:",isSignal)
+print("apply lepton iso: ","True" if args.noiso is True else "False (default)")
+print("apply trigger selection: ","True" if args.notrigger is True else "False (default)")
+print("run BDT: ","True" if args.nobdt is True else "False (default)")
+print("run tagger: ","True" if args.notagger is True else "False (default)")
+print("channel: ","single lepton" if args.leptons==1 else "dilepton")
+print("output directory:", args.output[0])
 
 globalOptions = {
     "isData": args.isData,
@@ -122,8 +123,15 @@ leptonSelection = [
         muonMinPt=9.,
         muonMinDxysig=6.,
     ),
+    MuonSelection(
+        inputCollection=lambda event: event.LooseMuons,
+        outputName="MuonsWithEtaAndPtReq",
+        muonMaxEta=2.4,
+        muonMinPt=5,
+    ),
     EventSkim(selection=lambda event: event.nLooseMuons > 0, outputName="Muons"),
-    EventSkim(selection=lambda event: event.nTriggeringMuons > 0, outputName="TrgMuon"),
+    #EventSkim(selection=lambda event: event.nTriggeringMuons > 0, outputName="TrgMuon"),
+    EventSkim(selection=lambda event: event.nMuonsWithEtaAndPtReq > 0, outputName="MuonsWithEtaPtReq"),
     SingleMuonTriggerSelection(
         inputCollection=lambda event: event.TriggeringMuons,
     ),
@@ -136,20 +144,36 @@ leptonSelection = [
     ),
 ]
 
-analyzerChain = []
+analyzerChain = [countHistogramsModule()]
 
 analyzerChain.extend(leptonSelection)
-
+'''
+analyzerChain.extend([
+    EventSkim(selection=lambda event: event.nMuon > 0, outputName="nMuons"),
+    #EventSkim(selection=lambda event: np.sum(np.logical_and(np.logical_and(event.Muon_pt > 5.0, event.Muon_eta < 2.4), event.Muon_eta > -2.4)) > 0, outputName="Muons"),
+    EventSkim(selection=lambda event: np.sum(event.Muon_eta > -2.4 & event.Muon_eta < 2.4) > 0, outputName="Muons")
+    #EventSkim(selection=lambda event: np.sum(event.Muon_pt > 5.0 & event.Muon_eta < 2.4 & event.Muon_eta > -2.4) > 0, outputName="Muons")
+])
+'''
+'''
 if args.notrigger is False:
     trigger_matched = lambda event: any([muon.isTriggerMatched>0 for muon in event.TriggeringMuons])
     analyzerChain.extend([
         EventSkim(selection=lambda event: (event.DisplacedMuonTrigger_flag) > 0,  outputName="l1_trigger"),
         EventSkim(selection=trigger_matched, outputName="l1_triggermatch"),
     ])
-    
+'''
+if args.notrigger is False:
+    analyzerChain.append(
+	EventSkim(selection=lambda event: (event.DisplacedMuonTrigger_flag) > 0,  outputName="l1_trigger")
+    )    
+
+'''    
 analyzerChain.append(
     EventSkim(selection=lambda event: event.nLooseMuons>=args.nLeptons, outputName="MinMuons")
 )
+'''
+
 
 featureDictFile = "${CMSSW_BASE}/src/PhysicsTools/NanoAODTools/data/nn/201117/experimental_feature_dict.py"
 
@@ -210,8 +234,11 @@ def jetSelectionSequence(jetDict):
                 inputCollection=jetCollection,
                 #leptonCollectionDRCleaning=lambda event: event.LooseMuons,
                 #leptonCollectionP4Subtraction=lambda event:event.LooseMuons,
+                jetMinPt=15.,
+                jetMaxEta=2.4,
                 globalFeatures = ['numberCpf', 'numberMuon', 'numberElectron'],
                 outputName="selectedJets_"+systName,
+                #outputName="selectedJets",
             ),
         ])
 #        
@@ -347,11 +374,13 @@ def qcdShatWeight(fileName):
         "Pt-1000toInf": 1.078,
     }
     weight = 1.
+    '''
     if "QCD_" in args.inputFiles[0] and "_MuEnrichedPt5" in args.inputFiles[0]:
         pt_bin = str(args.inputFiles[0].split("QCD_")[1].split("_MuEnrichedPt5")[0])
         xs = xs_pb.get(pt_bin,None)
         tree.GetEntry(0); nevents = tree.totalBeforeSkim
         weight = 1000. * xs / nevents if xs is not None else -1.
+    '''
     return weight
 
 if isMC:
@@ -397,7 +426,14 @@ if isMC:
         })
     )
         
-        
+    analyzerChain.append(
+        EventSkim(selection=lambda event: event.nselectedJets_nominal > 0, outputName="JetswithEtaPtReq")
+    ) 
+
+    analyzerChain.append(
+        EventSkim(selection=lambda event: event.xgb0 >= 0.95, outputName="BDTscore")
+    )
+    
 #    analyzerChain.extend(
 #        eventReconstructionSequence({
 #            "nominal": (lambda event: event.selectedJets_nominal, lambda event: event.met_nominal),
