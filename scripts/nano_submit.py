@@ -6,6 +6,7 @@ parser.add_argument("-i", "--inputDir", help="Input directory")
 parser.add_argument("-b", "--BDTDir", help="BDT directory")
 parser.add_argument("-o", "--outputDir", help="Output directory")
 args = parser.parse_args()
+cmsswBase = os.getenv("CMSSW_BASE")
 
 def submit(inputDir, BDTDir, outputDir):
     print (inputDir, BDTDir, outputDir)
@@ -24,13 +25,13 @@ def submit(inputDir, BDTDir, outputDir):
         iF = 0
         f.write('''
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cd /vols/cms/khl216/CMSSW_10_2_18
+cd '''+cmsswBase+'''
 eval $(scramv1 runtime -sh)
 cd -
 ''')
         for ifile, ifileBDT, ofile in zip(inputFiles, inputFilesBDT, outputFiles):
             iF += 1
-            f.write("fileArray[{}]='python /vols/cms/khl216/CMSSW_10_2_18/src/PhysicsTools/NanoAODTools/processors/DQCD.py --input {} --input {} {}'\n".format(iF,ifile, ifileBDT, outputDir))
+            f.write("fileArray[{}]='python {}/src/PhysicsTools/NanoAODTools/processors/DQCD.py --input {} --input {} {}'\n".format(iF,cmsswBase,ifile, ifileBDT, outputDir))
         f.write("eval ${fileArray[$SGE_TASK_ID]}\n")
     st = os.stat(submitBash)
     os.chmod(submitBash, st.st_mode | stat.S_IEXEC)
