@@ -430,9 +430,9 @@ if isMC:
         EventSkim(selection=lambda event: event.nselectedJets_nominal > 0, outputName="JetswithEtaPtReq")
     ) 
 
-    analyzerChain.append(
-        EventSkim(selection=lambda event: event.xgb0 >= 0.95, outputName="BDTscore")
-    )
+    # analyzerChain.append(
+    #     EventSkim(selection=lambda event: event.xgb0 >= 0.95, outputName="BDTscore")
+    # )
     
 #    analyzerChain.extend(
 #        eventReconstructionSequence({
@@ -521,6 +521,28 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("nSV",event.nSV)],
     [lambda tree: tree.branch("SV_mass", "F", lenVar="nSV"), 
      lambda tree,event: tree.fillBranch("SV_mass",[event.SV_mass[i] for i in range(len(event.SV_mass))])],
+    [lambda tree: tree.branch("SV_dxy", "F", lenVar="nSV"), 
+     lambda tree,event: tree.fillBranch("SV_dxy",[event.SV_dxy[i] for i in range(len(event.SV_dxy))])],
+    [lambda tree: tree.branch("SV_dxySig", "F", lenVar="nSV"), 
+     lambda tree,event: tree.fillBranch("SV_dxySig",[event.SV_dxySig[i] for i in range(len(event.SV_dxySig))])],
+    [lambda tree: tree.branch("nsv", "I"), 
+     lambda tree,event: tree.fillBranch("nsv",event.nsv)],
+    [lambda tree: tree.branch("sv_mass", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_mass",[event.sv_mass[i] for i in range(len(event.sv_mass))])],
+    [lambda tree: tree.branch("sv_dxy", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_dxy",[event.sv_dxy[i] for i in range(len(event.sv_dxy))])],
+    [lambda tree: tree.branch("sv_dxysig", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_dxysig",[event.sv_dxysig[i] for i in range(len(event.sv_dxysig))])],
+    [lambda tree: tree.branch("nsvAdapted", "I"), 
+     lambda tree,event: tree.fillBranch("nsvAdapted",event.nsvAdapted)],
+    [lambda tree: tree.branch("svAdapted_mass", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_mass",[event.svAdapted_mass[i] for i in range(len(event.svAdapted_mass))])],
+    [lambda tree: tree.branch("svAdapted_dxy", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_dxy",[event.svAdapted_dxy[i] for i in range(len(event.svAdapted_dxy))])],
+    [lambda tree: tree.branch("svAdapted_dxysig", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_dxysig",[event.svAdapted_dxysig[i] for i in range(len(event.svAdapted_dxysig))])],
+    [lambda tree: tree.branch("xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"), 
+     lambda tree,event: tree.fillBranch("xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
 ]
 
 weight = qcdShatWeight(args.inputFiles[0])
