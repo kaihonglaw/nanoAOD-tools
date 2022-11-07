@@ -433,6 +433,10 @@ if isMC:
     analyzerChain.append(
         EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.997, outputName="BDTscore")
     )
+
+    # analyzerChain.append(
+    #     EventSkim(selection=lambda event: event.xgb0 >= 0.95, outputName="BDTscore")
+    # )
     
 #    analyzerChain.extend(
 #        eventReconstructionSequence({
@@ -573,6 +577,8 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("Jet_muonSubtrFactor",[event.Jet_muonSubtrFactor[i] for i in range(len(event.Jet_muonSubtrFactor))])],
     [lambda tree: tree.branch("Jet_pt", "F", lenVar="nJet"),
      lambda tree,event: tree.fillBranch("Jet_pt",[event.Jet_pt[i] for i in range(len(event.Jet_pt))])],
+    [lambda tree: tree.branch("xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"), 
+     lambda tree,event: tree.fillBranch("xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
 ]
 
 weight = qcdShatWeight(args.inputFiles[0])

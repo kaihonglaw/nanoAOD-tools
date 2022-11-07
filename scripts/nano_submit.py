@@ -32,7 +32,11 @@ cd -
 
         for ifile, ifileBDT, ofile in zip(inputFiles, inputFilesBDT, outputFiles):
             iF += 1
+<<<<<<< HEAD
             f.write("fileArray[{}]='python {}/src/PhysicsTools/NanoAODTools/processors/DQCD.py --input {} --input {} {}'\n".format(iF,ifile, ifileBDT, outputDir))
+=======
+            f.write("fileArray[{}]='python {}/src/PhysicsTools/NanoAODTools/processors/DQCD.py --input {} --input {} {}'\n".format(iF,cmsswBase,ifile, ifileBDT, outputDir))
+>>>>>>> 478e8081716b92d2bc4a02235466257de7b429f8
         f.write("eval ${fileArray[$SGE_TASK_ID]}\n")
     st = os.stat(submitBash)
     os.chmod(submitBash, st.st_mode | stat.S_IEXEC)
