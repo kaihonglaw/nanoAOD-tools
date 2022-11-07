@@ -429,9 +429,9 @@ if isMC:
     analyzerChain.append(
         EventSkim(selection=lambda event: event.nselectedJets_nominal > 0, outputName="JetswithEtaPtReq")
     ) 
-
+    
     analyzerChain.append(
-        EventSkim(selection=lambda event: event.xgb0 >= 0.95, outputName="BDTscore")
+        EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.997, outputName="BDTscore")
     )
     
 #    analyzerChain.extend(
@@ -521,6 +521,58 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("nSV",event.nSV)],
     [lambda tree: tree.branch("SV_mass", "F", lenVar="nSV"), 
      lambda tree,event: tree.fillBranch("SV_mass",[event.SV_mass[i] for i in range(len(event.SV_mass))])],
+    [lambda tree: tree.branch("SV_dxy", "F", lenVar="nSV"), 
+     lambda tree,event: tree.fillBranch("SV_dxy",[event.SV_dxy[i] for i in range(len(event.SV_dxy))])],
+    [lambda tree: tree.branch("SV_dxySig", "F", lenVar="nSV"), 
+     lambda tree,event: tree.fillBranch("SV_dxySig",[event.SV_dxySig[i] for i in range(len(event.SV_dxySig))])],
+    [lambda tree: tree.branch("nsv", "I"), 
+     lambda tree,event: tree.fillBranch("nsv",event.nsv)],
+    [lambda tree: tree.branch("sv_mass", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_mass",[event.sv_mass[i] for i in range(len(event.sv_mass))])],
+    [lambda tree: tree.branch("sv_dxy", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_dxy",[event.sv_dxy[i] for i in range(len(event.sv_dxy))])],
+    [lambda tree: tree.branch("sv_dxysig", "F", lenVar="nsv"), 
+     lambda tree,event: tree.fillBranch("sv_dxysig",[event.sv_dxysig[i] for i in range(len(event.sv_dxysig))])],
+    [lambda tree: tree.branch("nsvAdapted", "I"), 
+     lambda tree,event: tree.fillBranch("nsvAdapted",event.nsvAdapted)],
+    [lambda tree: tree.branch("svAdapted_mass", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_mass",[event.svAdapted_mass[i] for i in range(len(event.svAdapted_mass))])],
+    [lambda tree: tree.branch("svAdapted_dxy", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_dxy",[event.svAdapted_dxy[i] for i in range(len(event.svAdapted_dxy))])],
+    [lambda tree: tree.branch("svAdapted_dxysig", "F", lenVar="nsvAdapted"), 
+     lambda tree,event: tree.fillBranch("svAdapted_dxysig",[event.svAdapted_dxysig[i] for i in range(len(event.svAdapted_dxysig))])],
+    [lambda tree: tree.branch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"), 
+     lambda tree,event: tree.fillBranch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
+    [lambda tree: tree.branch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
+     lambda tree,event: tree.fillBranch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
+    [lambda tree: tree.branch("xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
+     lambda tree,event: tree.fillBranch("xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
+    [lambda tree: tree.branch("nMuon", "I"),
+     lambda tree,event: tree.fillBranch("nMuon",event.nMuon)],
+    [lambda tree: tree.branch("Muon_sip3d", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_sip3d",[event.Muon_sip3d[i] for i in range(len(event.Muon_sip3d))])],
+    [lambda tree: tree.branch("Muon_ip3d", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_ip3d",[event.Muon_ip3d[i] for i in range(len(event.Muon_ip3d))])],
+    [lambda tree: tree.branch("Muon_dxy", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_dxy",[event.Muon_dxy[i] for i in range(len(event.Muon_dxy))])],
+    [lambda tree: tree.branch("Muon_dz", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_dz",[event.Muon_dz[i] for i in range(len(event.Muon_dz))])],
+    [lambda tree: tree.branch("Muon_pt", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_pt",[event.Muon_pt[i] for i in range(len(event.Muon_pt))])],
+    [lambda tree: tree.branch("Muon_dzErr", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_dzErr",[event.Muon_dzErr[i] for i in range(len(event.Muon_dzErr))])],
+    [lambda tree: tree.branch("Muon_dxyErr", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_dxyErr",[event.Muon_dxyErr[i] for i in range(len(event.Muon_dxyErr))])],
+    [lambda tree: tree.branch("Muon_eta", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_eta",[event.Muon_eta[i] for i in range(len(event.Muon_eta))])],
+    [lambda tree: tree.branch("nJet", "I"),
+     lambda tree,event: tree.fillBranch("nJet",event.nJet)],
+    [lambda tree: tree.branch("Jet_muEF", "F", lenVar="nJet"),
+     lambda tree,event: tree.fillBranch("Jet_muEF",[event.Jet_muEF[i] for i in range(len(event.Jet_muEF))])],
+    [lambda tree: tree.branch("Jet_muonSubtrFactor", "F", lenVar="nJet"),
+     lambda tree,event: tree.fillBranch("Jet_muonSubtrFactor",[event.Jet_muonSubtrFactor[i] for i in range(len(event.Jet_muonSubtrFactor))])],
+    [lambda tree: tree.branch("Jet_pt", "F", lenVar="nJet"),
+     lambda tree,event: tree.fillBranch("Jet_pt",[event.Jet_pt[i] for i in range(len(event.Jet_pt))])],
 ]
 
 weight = qcdShatWeight(args.inputFiles[0])
