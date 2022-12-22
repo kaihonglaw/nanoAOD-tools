@@ -120,6 +120,7 @@ leptonSelection = [
     MuonSelection(
         inputCollection=lambda event: event.LooseMuons,
         outputName="TriggeringMuons",
+        muonMaxEta=1.5,
         muonMinPt=9.,
         muonMinDxysig=6.,
     ),
@@ -130,7 +131,7 @@ leptonSelection = [
         muonMinPt=5,
     ),
     EventSkim(selection=lambda event: event.nLooseMuons > 0, outputName="Muons"),
-    #EventSkim(selection=lambda event: event.nTriggeringMuons > 0, outputName="TrgMuon"),
+    EventSkim(selection=lambda event: event.nTriggeringMuons > 0, outputName="TrgMuon"),
     EventSkim(selection=lambda event: event.nMuonsWithEtaAndPtReq > 0, outputName="MuonsWithEtaPtReq"),
     SingleMuonTriggerSelection(
         inputCollection=lambda event: event.TriggeringMuons,
@@ -155,7 +156,7 @@ analyzerChain.extend([
     #EventSkim(selection=lambda event: np.sum(event.Muon_pt > 5.0 & event.Muon_eta < 2.4 & event.Muon_eta > -2.4) > 0, outputName="Muons")
 ])
 '''
-'''
+
 if args.notrigger is False:
     trigger_matched = lambda event: any([muon.isTriggerMatched>0 for muon in event.TriggeringMuons])
     analyzerChain.extend([
@@ -167,7 +168,7 @@ if args.notrigger is False:
     analyzerChain.append(
 	EventSkim(selection=lambda event: (event.DisplacedMuonTrigger_flag) > 0,  outputName="l1_trigger")
     )    
-
+'''
 '''    
 analyzerChain.append(
     EventSkim(selection=lambda event: event.nLooseMuons>=args.nLeptons, outputName="MinMuons")
@@ -429,11 +430,11 @@ if isMC:
     analyzerChain.append(
         EventSkim(selection=lambda event: event.nselectedJets_nominal > 0, outputName="JetswithEtaPtReq")
     ) 
-    
+    ''' 
     analyzerChain.append(
-        EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.997, outputName="BDTscore")
+        EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.999, outputName="BDTscore")
     )
-
+    '''
     
 #    analyzerChain.extend(
 #        eventReconstructionSequence({
@@ -534,6 +535,8 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("sv_dxy",[event.sv_dxy[i] for i in range(len(event.sv_dxy))])],
     [lambda tree: tree.branch("sv_dxysig", "F", lenVar="nsv"), 
      lambda tree,event: tree.fillBranch("sv_dxysig",[event.sv_dxysig[i] for i in range(len(event.sv_dxysig))])],
+    [lambda tree: tree.branch("sv_ntracks", "F", lenVar="nsv"),
+     lambda tree,event: tree.fillBranch("sv_ntracks",[event.sv_ntracks[i] for i in range(len(event.sv_ntracks))])],   
     [lambda tree: tree.branch("nsvAdapted", "I"), 
      lambda tree,event: tree.fillBranch("nsvAdapted",event.nsvAdapted)],
     [lambda tree: tree.branch("svAdapted_mass", "F", lenVar="nsvAdapted"), 
@@ -542,12 +545,8 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("svAdapted_dxy",[event.svAdapted_dxy[i] for i in range(len(event.svAdapted_dxy))])],
     [lambda tree: tree.branch("svAdapted_dxysig", "F", lenVar="nsvAdapted"), 
      lambda tree,event: tree.fillBranch("svAdapted_dxysig",[event.svAdapted_dxysig[i] for i in range(len(event.svAdapted_dxysig))])],
-    [lambda tree: tree.branch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"), 
-     lambda tree,event: tree.fillBranch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
-    [lambda tree: tree.branch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
-     lambda tree,event: tree.fillBranch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
-    [lambda tree: tree.branch("xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
-     lambda tree,event: tree.fillBranch("xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_only_mu__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
+    [lambda tree: tree.branch("svAdapted_ntracks", "F", lenVar="nsvAdapted"),
+     lambda tree,event: tree.fillBranch("svAdapted_ntracks",[event.svAdapted_ntracks[i] for i in range(len(event.svAdapted_ntracks))])],
     [lambda tree: tree.branch("nMuon", "I"),
      lambda tree,event: tree.fillBranch("nMuon",event.nMuon)],
     [lambda tree: tree.branch("Muon_sip3d", "F", lenVar="nMuon"),
@@ -574,8 +573,13 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("Jet_muonSubtrFactor",[event.Jet_muonSubtrFactor[i] for i in range(len(event.Jet_muonSubtrFactor))])],
     [lambda tree: tree.branch("Jet_pt", "F", lenVar="nJet"),
      lambda tree,event: tree.fillBranch("Jet_pt",[event.Jet_pt[i] for i in range(len(event.Jet_pt))])],
+    [lambda tree: tree.branch("Leading_Jet_pt", "F"),
+     lambda tree,event: tree.fillBranch("Leading_Jet_pt",event.Jet_pt[0])],
 ]
-
+'''
+storeVariables.append([lambda tree: tree.branch("Subleading_Jet_pt", "F"),
+                       lambda tree,event: tree.fillBranch("Subleading_Jet_pt",[event.Jet_pt[1]]) if (event.nJet > 1)])
+'''
 weight = qcdShatWeight(args.inputFiles[0])
 storeVariables.append([lambda tree: tree.branch("qcdShatWeight", "F"),
                        lambda tree, event: tree.fillBranch("qcdShatWeight",weight)])
