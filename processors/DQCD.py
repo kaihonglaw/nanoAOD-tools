@@ -122,7 +122,7 @@ leptonSelection = [
         outputName="TriggeringMuons",
         muonMaxEta=1.5,
         muonMinPt=9.,
-        muonMinDxysig=6.,
+        muonMinSip3d=6.,
     ),
     MuonSelection(
         inputCollection=lambda event: event.LooseMuons,
@@ -159,10 +159,21 @@ analyzerChain.extend([
 
 if args.notrigger is False:
     trigger_matched = lambda event: any([muon.isTriggerMatched>0 for muon in event.TriggeringMuons])
+    #trigger_matched2 = lambda event: sum([muon.isTriggerMatched>0 for muon in event.TriggeringMuons]) == 2
     analyzerChain.extend([
         EventSkim(selection=lambda event: (event.DisplacedMuonTrigger_flag) > 0,  outputName="l1_trigger"),
         EventSkim(selection=trigger_matched, outputName="l1_triggermatch"),
     ])
+
+leptonSelection2=[
+MuonSelection(
+        inputCollection=lambda event: event.TriggeringMuons,
+        outputName="TriggeringMuons_triggermatched",
+        triggermatching = True,
+    ),
+]
+
+analyzerChain.extend(leptonSelection2)
 '''
 if args.notrigger is False:
     analyzerChain.append(

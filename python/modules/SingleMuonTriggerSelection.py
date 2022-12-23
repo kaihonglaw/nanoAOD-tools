@@ -101,18 +101,21 @@ class SingleMuonTriggerSelection(Module):
                 weight_trigger_down-=weight_trigger_nominal*0.5*0.01
 
         trigger_flag = 0
-
+        '''
         if self.globalOptions["year"] == 2016:
+            print("year = 2016")
             trigger_flag = event.HLT_IsoMu24>0 or event.HLT_IsoTkMu24>0
 
         elif self.globalOptions["year"] == 2017:
+            print("year = 2017")
             trigger_flag = event.HLT_IsoMu27>0 or event.HLT_IsoMu24>0
 
         elif self.globalOptions["year"] == 2018:
+        '''
             #trigger_flag = event.HLT_IsoMu24
 
-            print("year = 2018")
-            trigger_flag = event.HLT_Mu9_IP6_part0 or \
+        print("year = 2018")
+        trigger_flag = event.HLT_Mu9_IP6_part0 or \
                            event.HLT_Mu9_IP6_part1 or \
                            event.HLT_Mu9_IP6_part2 or \
                            event.HLT_Mu9_IP6_part3 or \

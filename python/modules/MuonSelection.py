@@ -29,9 +29,11 @@ class MuonSelection(Module):
         muonMaxDxy=-1.,
         muonMaxDz=-1.,
         muonMinDxysig=-1.,
-        storeKinematics=['pt','eta'],
+        muonMinSip3d=-1.,
+        storeKinematics=['pt','eta', 'sip3d'],
         storeWeights=False,
         selectLeadingOnly=False,
+        triggermatching=False,
         globalOptions={"isData":False, "year":2018}
     ):
         
@@ -43,9 +45,11 @@ class MuonSelection(Module):
         self.muonMaxDxy = muonMaxDxy
         self.muonMaxDz = muonMaxDz
         self.muonMinDxysig = muonMinDxysig
+        self.muonMinSip3d = muonMinSip3d
         self.storeKinematics = storeKinematics
         self.storeWeights = storeWeights
         self.selectLeadingOnly = selectLeadingOnly
+        self.triggermatching = triggermatching
         self.muonID=muonID
 
         if muonID==MuonSelection.MEDIUM or muonIso==MuonSelection.MEDIUM:
@@ -317,6 +321,12 @@ class MuonSelection(Module):
                     continue
                 dxysig = muon.dxy/muon.dxyErr if muon.dxyErr>0. else 0.
                 if self.muonMinDxysig > 0. and abs(dxysig) < self.muonMinDxysig:
+                    unselectedMuons.append(muon)
+                    continue
+                if self.muonMinSip3d > 0. and abs(muon.sip3d) < self.muonMinSip3d:
+                    unselectedMuons.append(muon)
+                    continue
+                if self.triggermatching == True and muon.isTriggerMatched <= 0:
                     unselectedMuons.append(muon)
                     continue
                 selectedMuons.append(muon)                    
