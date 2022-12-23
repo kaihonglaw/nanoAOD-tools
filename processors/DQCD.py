@@ -71,10 +71,10 @@ puProcessName = args.overwrite_pu
 
 print("year:", year)
 print("isSignal:",isSignal)
-print("apply lepton iso: ","True" if args.noiso is True else "False (default)")
-print("apply trigger selection: ","True" if args.notrigger is True else "False (default)")
-print("run BDT: ","True" if args.nobdt is True else "False (default)")
-print("run tagger: ","True" if args.notagger is True else "False (default)")
+print("No lepton iso: ","True" if args.noiso is True else "False (default)")
+print("No trigger: ","True" if args.notrigger is True else "False (default)")
+print("No BDT: ","True" if args.nobdt is True else "False (default)")
+print("No tagger: ","True" if args.notagger is True else "False (default)")
 print("channel: ","single lepton" if args.leptons==1 else "dilepton")
 print("output directory:", args.output[0])
 

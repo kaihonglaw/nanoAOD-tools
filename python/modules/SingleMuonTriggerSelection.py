@@ -116,11 +116,11 @@ class SingleMuonTriggerSelection(Module):
 
         print("year = 2018")
         trigger_flag = event.HLT_Mu9_IP6_part0 or \
-                           event.HLT_Mu9_IP6_part1 or \
-                           event.HLT_Mu9_IP6_part2 or \
-                           event.HLT_Mu9_IP6_part3 or \
-                           event.HLT_Mu9_IP6_part4
-                           # or event.HLT_Mu9_IP6_part5
+                       event.HLT_Mu9_IP6_part1 or \
+                       event.HLT_Mu9_IP6_part2 or \
+                       event.HLT_Mu9_IP6_part3 or \
+                       event.HLT_Mu9_IP6_part4
+                       # or event.HLT_Mu9_IP6_part5
             
         print("trigger_flag =", trigger_flag)
         self.out.fillBranch(self.outputName+"_flag", trigger_flag)
