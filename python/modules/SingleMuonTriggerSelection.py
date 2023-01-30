@@ -115,13 +115,15 @@ class SingleMuonTriggerSelection(Module):
             #trigger_flag = event.HLT_IsoMu24
 
         print("year = 2018")
+        #trigger_flag = any([event.Muon_fired_HLT_Mu9_IP6[i]>0 for i in range(len(event.Muon_fired_HLT_Mu9_IP6))])
+        
         trigger_flag = event.HLT_Mu9_IP6_part0 or \
                        event.HLT_Mu9_IP6_part1 or \
                        event.HLT_Mu9_IP6_part2 or \
                        event.HLT_Mu9_IP6_part3 or \
                        event.HLT_Mu9_IP6_part4
                        # or event.HLT_Mu9_IP6_part5
-            
+         
         print("trigger_flag =", trigger_flag)
         self.out.fillBranch(self.outputName+"_flag", trigger_flag)
             

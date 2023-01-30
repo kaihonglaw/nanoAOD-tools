@@ -20,7 +20,7 @@ class MuonSelection(Module):
 
     def __init__(
         self,
-        inputCollection=lambda event: Collection(event, "Muon"),
+        inputCollection=lambda event: Collection(event, "MuonBPark"),
         outputName="LooseMuons",
         muonID=LOOSE,
         muonIso=NONE,
@@ -326,9 +326,10 @@ class MuonSelection(Module):
                 if self.muonMinSip3d > 0. and abs(muon.sip3d) < self.muonMinSip3d:
                     unselectedMuons.append(muon)
                     continue
-                if self.triggermatching == True and muon.isTriggerMatched <= 0:
-                    unselectedMuons.append(muon)
-                    continue
+                if self.triggermatching == True:
+	            if muon.isTriggering <=0 or muon.fired_HLT_Mu9_IP6 <= 0:
+                        unselectedMuons.append(muon)
+                        continue
                 selectedMuons.append(muon)                    
             else:
                 unselectedMuons.append(muon)
