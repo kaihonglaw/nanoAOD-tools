@@ -30,7 +30,7 @@ class MuonSelection(Module):
         muonMaxDz=-1.,
         muonMinDxysig=-1.,
         muonMinSip3d=-1.,
-        storeKinematics=['pt','eta', 'sip3d'],
+        storeKinematics=['pt','eta', 'phi', 'sip3d', 'ip3d', 'dxy', 'dxyErr'],
         storeWeights=False,
         selectLeadingOnly=False,
         triggermatching=False,

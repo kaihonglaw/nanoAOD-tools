@@ -173,7 +173,18 @@ MuonSelection(
     ),
 ]
 
+leptonSelection3=[
+MuonSelection(
+        inputCollection=lambda event: event.LooseMuons,
+        outputName="MuonsWithTighterEtaAndPtReq",
+        muonMaxEta=1.5,
+        muonMinPt=10,
+    ),
+]
+
 analyzerChain.extend(leptonSelection2)
+analyzerChain.extend(leptonSelection3)
+
 '''
 if args.notrigger is False:
     analyzerChain.append(
@@ -441,11 +452,11 @@ if isMC:
     analyzerChain.append(
         EventSkim(selection=lambda event: event.nselectedJets_nominal > 0, outputName="JetswithEtaPtReq")
     ) 
-    ''' 
+     
     analyzerChain.append(
-        EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.999, outputName="BDTscore")
+        EventSkim(selection=lambda event: event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0 >= 0.0, outputName="BDTscore")
     )
-    '''
+    
     
 #    analyzerChain.extend(
 #        eventReconstructionSequence({
@@ -576,6 +587,10 @@ storeVariables = [
      lambda tree,event: tree.fillBranch("Muon_dxyErr",[event.Muon_dxyErr[i] for i in range(len(event.Muon_dxyErr))])],
     [lambda tree: tree.branch("Muon_eta", "F", lenVar="nMuon"),
      lambda tree,event: tree.fillBranch("Muon_eta",[event.Muon_eta[i] for i in range(len(event.Muon_eta))])],
+    [lambda tree: tree.branch("Muon_phi", "F", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_phi",[event.Muon_phi[i] for i in range(len(event.Muon_phi))])],
+    [lambda tree: tree.branch("Muon_charge", "I", lenVar="nMuon"),
+     lambda tree,event: tree.fillBranch("Muon_charge",[event.Muon_charge[i] for i in range(len(event.Muon_charge))])],
     [lambda tree: tree.branch("nJet", "I"),
      lambda tree,event: tree.fillBranch("nJet",event.nJet)],
     [lambda tree: tree.branch("Jet_muEF", "F", lenVar="nJet"),
@@ -615,7 +630,23 @@ storeVariables = [
     [lambda tree: tree.branch("muonSV_mu1pt", "F", lenVar="nmuonSV"),
      lambda tree,event: tree.fillBranch("muonSV_mu1pt",[event.muonSV_mu1pt[i] for i in range(len(event.muonSV_mu1pt))])],
     [lambda tree: tree.branch("muonSV_mu2pt", "F", lenVar="nmuonSV"),
-     lambda tree,event: tree.fillBranch("muonSV_mu2pt",[event.muonSV_mu2pt[i] for i in range(len(event.muonSV_mu2pt))])] 
+     lambda tree,event: tree.fillBranch("muonSV_mu2pt",[event.muonSV_mu2pt[i] for i in range(len(event.muonSV_mu2pt))])],
+    [lambda tree: tree.branch("muonSV_mu1phi", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu1phi",[event.muonSV_mu1phi[i] for i in range(len(event.muonSV_mu1phi))])],
+    [lambda tree: tree.branch("muonSV_mu2phi", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu2phi",[event.muonSV_mu2phi[i] for i in range(len(event.muonSV_mu2phi))])],
+    [lambda tree: tree.branch("muonSV_mu1eta", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu1eta",[event.muonSV_mu1eta[i] for i in range(len(event.muonSV_mu1eta))])],
+    [lambda tree: tree.branch("muonSV_mu2eta", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu2eta",[event.muonSV_mu2eta[i] for i in range(len(event.muonSV_mu2eta))])],
+    [lambda tree: tree.branch("muonSV_mu1index", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu1index",[event.muonSV_mu1index[i] for i in range(len(event.muonSV_mu1index))])],
+    [lambda tree: tree.branch("muonSV_mu2index", "F", lenVar="nmuonSV"),
+     lambda tree,event: tree.fillBranch("muonSV_mu2index",[event.muonSV_mu2index[i] for i in range(len(event.muonSV_mu2index))])],
+    [lambda tree: tree.branch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
+     lambda tree,event: tree.fillBranch("xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)],
+    [lambda tree: tree.branch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0", "F"),
+     lambda tree,event: tree.fillBranch("xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0",event.xgb0_no_mass__m_2p0_ctau_10p0_xiO_1p0_xiL_1p0)]   
 ]
 '''
 storeVariables.append([lambda tree: tree.branch("Subleading_Jet_pt", "F"),
